@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import {
-  Settings as Cog, Network, Activity, Bell, Users, Code2, DatabaseBackup, Save, Download, Copy, Check,
+  Settings as Cog, Network, Activity, Bell, Users, Code2, DatabaseBackup, Save, Download, Copy, Check, MessageCircle,
 } from 'lucide-react'
 import Card from '../components/Card'
 import Button from '../components/Button'
@@ -68,6 +68,48 @@ export default function Settings() {
       /* ignore */
     }
     push('Backend URL saved', 'success')
+  }
+
+  const [botUrl, setBotUrl] = useState(() => {
+    try {
+      return localStorage.getItem('mtnoc_bot_url') || 'http://localhost:4001'
+    } catch {
+      return 'http://localhost:4001'
+    }
+  })
+  const [groupLink, setGroupLink] = useState('')
+  const [botStatus, setBotStatus] = useState('')
+
+  const connectBot = async () => {
+    const base = botUrl.trim().replace(/\/$/, '')
+    try {
+      localStorage.setItem('mtnoc_bot_url', base)
+    } catch {
+      /* ignore */
+    }
+    if (!groupLink.trim()) {
+      push('Paste your WhatsApp group link first', 'error')
+      return
+    }
+    setBotStatus('Connecting…')
+    try {
+      const res = await fetch(`${base}/join`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ link: groupLink.trim() }),
+      })
+      const data = await res.json()
+      if (data.ok) {
+        setBotStatus(`✅ Bot joined: ${data.group?.name || data.group?.jid}`)
+        push('Bot connected to group', 'success')
+      } else {
+        setBotStatus(`⚠️ ${data.reason || data.error || 'failed'}`)
+        push('Bot connect failed', 'error')
+      }
+    } catch {
+      setBotStatus(`⚠️ Bot not reachable at ${base} — run: node baileys-bridge.js`)
+      push('Bot not reachable', 'error')
+    }
   }
 
   const saveNotify = () => {
@@ -186,6 +228,30 @@ export default function Settings() {
               (<code className="mx-1 rounded bg-slate-200 px-1 dark:bg-noc-border">server/</code>) forwards them to
               <strong> WhatsApp Cloud API</strong>. See <code className="mx-1 rounded bg-slate-200 px-1 dark:bg-noc-border">server/README.md</code>.
             </p>
+
+            <div className="mt-5 rounded-lg border border-emerald-200 bg-emerald-50/50 p-4 dark:border-emerald-500/20 dark:bg-emerald-500/5">
+              <div className="mb-2 flex items-center gap-2">
+                <MessageCircle className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
+                <span className="text-sm font-semibold text-slate-700 dark:text-slate-200">WhatsApp Bot — mahfuztitasaiagent</span>
+              </div>
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                <Field label="Bot server URL">
+                  <input className="noc-input font-mono" value={botUrl} onChange={(e) => setBotUrl(e.target.value)} placeholder="http://localhost:4001" />
+                </Field>
+                <Field label="Your WhatsApp group link">
+                  <input className="noc-input" value={groupLink} onChange={(e) => setGroupLink(e.target.value)} placeholder="https://chat.whatsapp.com/XXXXXXXX" />
+                </Field>
+              </div>
+              <div className="mt-3 flex flex-wrap items-center gap-3">
+                <Button icon={MessageCircle} onClick={connectBot}>Connect bot to group</Button>
+                {botStatus && <span className="text-xs text-slate-500 dark:text-slate-400">{botStatus}</span>}
+              </div>
+              <p className="mt-2 text-[11px] text-slate-400">
+                Just paste your group link — the bot joins that group and forwards every NMS alert there. (Run the bot
+                once and scan the QR to log in.)
+              </p>
+            </div>
+
             <div className="mt-4 flex justify-end"><Button icon={Save} onClick={saveNotify}>Save Changes</Button></div>
           </Card>
         )}

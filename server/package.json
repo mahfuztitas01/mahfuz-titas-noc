@@ -3,14 +3,18 @@
   "private": true,
   "version": "1.0.0",
   "type": "module",
-  "description": "Mahfuz Titas NOC — WhatsApp Cloud API alert bridge",
+  "description": "Mahfuz Titas NOC — WhatsApp alert bridge (Cloud API + Baileys group gateway)",
   "scripts": {
     "start": "node index.js",
-    "dev": "node --watch index.js"
+    "dev": "node --watch index.js",
+    "start:baileys": "node baileys-bridge.js"
   },
   "dependencies": {
+    "@whiskeysockets/baileys": "^6.7.9",
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
-    "express": "^4.19.2"
+    "express": "^4.19.2",
+    "pino": "^9.5.0",
+    "qrcode-terminal": "^0.12.0"
   }
 }
