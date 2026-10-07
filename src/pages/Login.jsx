@@ -122,23 +122,25 @@ export default function Login() {
         </Button>
       </form>
 
-      {/* Demo accounts */}
-      <div className="mt-6 rounded-lg border border-slate-200 p-3 dark:border-noc-border">
-        <p className="mb-2 text-[11px] font-semibold uppercase tracking-wide text-slate-400">Demo accounts (click to fill)</p>
-        <div className="grid grid-cols-2 gap-1.5">
-          {DEMO.map((d) => (
-            <button
-              key={d.username}
-              type="button"
-              onClick={() => fill(d)}
-              className="rounded-md border border-slate-200 px-2 py-1.5 text-left text-[11px] hover:bg-slate-50 dark:border-noc-border dark:hover:bg-noc-panel2"
-            >
-              <span className="block font-semibold text-slate-700 dark:text-slate-200">{d.username}</span>
-              <span className="block text-slate-400">{d.label}</span>
-            </button>
-          ))}
+      {/* Demo accounts — shown ONLY in local development, never on the deployed site */}
+      {import.meta.env.DEV && (
+        <div className="mt-6 rounded-lg border border-slate-200 p-3 dark:border-noc-border">
+          <p className="mb-2 text-[11px] font-semibold uppercase tracking-wide text-slate-400">Demo accounts (click to fill) — dev only</p>
+          <div className="grid grid-cols-2 gap-1.5">
+            {DEMO.map((d) => (
+              <button
+                key={d.username}
+                type="button"
+                onClick={() => fill(d)}
+                className="rounded-md border border-slate-200 px-2 py-1.5 text-left text-[11px] hover:bg-slate-50 dark:border-noc-border dark:hover:bg-noc-panel2"
+              >
+                <span className="block font-semibold text-slate-700 dark:text-slate-200">{d.username}</span>
+                <span className="block text-slate-400">{d.label}</span>
+              </button>
+            ))}
+          </div>
         </div>
-      </div>
+      )}
 
       <p className="mt-6 text-center text-xs text-slate-400">
         {BRAND.name} — {BRAND.statement}
