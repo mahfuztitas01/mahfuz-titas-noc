@@ -53,6 +53,22 @@ export default function Settings() {
   const [copied, setCopied] = useState(false)
   const [notif, setNotif] = useState({ email: true, telegram: true, webhook: false, desktop: true })
   const [notifCfg, setNotifCfg] = useState(getNotifyConfig())
+  const [backendUrl, setBackendUrl] = useState(() => {
+    try {
+      return localStorage.getItem('mtnoc_backend') || ''
+    } catch {
+      return ''
+    }
+  })
+
+  const saveBackend = () => {
+    try {
+      localStorage.setItem('mtnoc_backend', backendUrl.trim())
+    } catch {
+      /* ignore */
+    }
+    push('Backend URL saved', 'success')
+  }
 
   const saveNotify = () => {
     saveNotifyConfig(notifCfg)
@@ -126,8 +142,11 @@ export default function Settings() {
         )}
 
         {section === 'monitoring' && (
-          <Card title="Monitoring" subtitle="Polling intervals and thresholds">
+          <Card title="Monitoring" subtitle="Polling intervals, thresholds and backend">
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <Field label="Backend URL (cloud server for ping/WhatsApp)">
+                <input className="noc-input font-mono" value={backendUrl} onChange={(e) => setBackendUrl(e.target.value)} placeholder="https://mtnoc-backend.onrender.com" />
+              </Field>
               <Field label="Monitoring Interval">
                 <select className="noc-input" defaultValue="30 seconds">
                   {['10 seconds', '30 seconds', '60 seconds', '5 minutes'].map((t) => <option key={t}>{t}</option>)}
@@ -137,7 +156,11 @@ export default function Settings() {
               <Field label="Retries"><input className="noc-input" defaultValue="2" /></Field>
               <Field label="CPU Alert Threshold (%)"><input className="noc-input" defaultValue="85" /></Field>
             </div>
-            <div className="mt-4 flex justify-end"><Button icon={Save} onClick={() => save('Monitoring')}>Save Changes</Button></div>
+            <p className="mt-3 rounded-lg bg-slate-50 p-3 text-xs text-slate-500 dark:bg-noc-panel2 dark:text-slate-400">
+              Put your cloud backend URL here so the deployed site can reach it from any network. Leave blank to use
+              this machine (localhost:4000).
+            </p>
+            <div className="mt-4 flex justify-end"><Button icon={Save} onClick={saveBackend}>Save Backend URL</Button></div>
           </Card>
         )}
 

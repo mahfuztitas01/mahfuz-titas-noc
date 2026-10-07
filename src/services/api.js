@@ -34,12 +34,23 @@ export const api = {
   getTopology: () => respond(mock.topology),
 }
 
-// Real backend base URL (the WhatsApp bridge + ping service).
+// Real backend base URL (WhatsApp bridge + ping service).
+// Resolved at runtime: Settings value (localStorage) → build env → localhost.
+export function getBackendUrl() {
+  try {
+    const v = localStorage.getItem('mtnoc_backend')
+    if (v && v.trim()) return v.trim().replace(/\/$/, '')
+  } catch {
+    /* ignore */
+  }
+  return import.meta.env.VITE_BACKEND_URL || 'http://localhost:4000'
+}
+
 export const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:4000'
 
 // Ping a list of device hosts from the backend; returns per-host online/offline.
 export async function pingHosts(hosts) {
-  const res = await fetch(`${BACKEND_URL}/api/ping`, {
+  const res = await fetch(`${getBackendUrl()}/api/ping`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ hosts }),

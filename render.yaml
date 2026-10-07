@@ -1,0 +1,24 @@
+# Render blueprint — free Node web service for the Mahfuz Titas NOC backend
+# (WhatsApp bridge + ping). Deploy: Render → New → Blueprint → pick this repo.
+services:
+  - type: web
+    name: mtnoc-backend
+    runtime: node
+    rootDir: server
+    plan: free
+    buildCommand: npm install
+    startCommand: npm start
+    healthCheckPath: /health
+    envVars:
+      - key: WHATSAPP_PHONE_NUMBER_ID
+        sync: false
+      - key: WHATSAPP_TOKEN
+        sync: false
+      - key: WHATSAPP_API_VERSION
+        value: v21.0
+      - key: ENGINEER_NUMBERS
+        sync: false
+      - key: CLIENT_ROUTES
+        sync: false
+      - key: WHATSAPP_TO
+        sync: false
