@@ -197,11 +197,72 @@ const payload = {
 
 ---
 
+## 10. Deploy 24/7 (PC off thakleo chole) — FREE
+
+The bot must run on an **always-on machine**. Best free option: **Oracle Cloud "Always Free" VM**
+(a real 24/7 VM, no charge). Render free **sleeps** and would drop the WhatsApp session.
+
+### A) Oracle Cloud Always Free VM (recommended, free 24/7)
+1. Sign up at **cloud.oracle.com** → create a VM: **Ubuntu 22.04**, shape **VM.Standard.E2.1.Micro** (Always Free eligible). (A card is used for verification only.)
+2. In the VCN **security list** + on the VM (`sudo ufw allow 4000,4001/tcp`) open ports **4000** and **4001**.
+3. SSH in and install Node 20 + git:
+   ```bash
+   sudo apt update && sudo apt install -y git
+   curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash - && sudo apt install -y nodejs
+   ```
+4. Clone your repo:
+   ```bash
+   sudo mkdir -p /opt && cd /opt
+   sudo git clone https://github.com/mahfuztitas01/mahfuz-titas-noc.git
+   ```
+5. Configure:
+   ```bash
+   cd /opt/mahfuz-titas-noc/server
+   cp .env.example .env && nano .env      # fill WhatsApp + BOT_NAME=mahfuztitasaiagent
+   npm install
+   ```
+6. **First login (scan QR once):**
+   ```bash
+   node baileys-bridge.js                 # scan with WhatsApp (Linked devices), then Ctrl+C
+   ```
+7. **Auto-start 24/7:**
+   ```bash
+   sudo cp mtnoc-backend.service /etc/systemd/system/
+   sudo systemctl daemon-reload
+   sudo systemctl enable --now mtnoc-backend
+   ```
+8. Done — **PC off thakleo** bot + backend 24/7 cholbe.
+
+### B) Docker (any VM / server)
+```bash
+cd server
+docker compose up -d --build
+docker compose logs -f          # QR appears → scan once
+```
+
+### Then in the NOC app (Settings → Notifications)
+| Field | Value |
+|-------|-------|
+| **Bot server URL** | `http://<VM-IP>:4001` |
+| **Your WhatsApp group link** | paste link → **Connect bot to group** |
+| **Webhook URL** | `http://<VM-IP>:4001/alerts` |
+
+Now every NMS alert goes to your WhatsApp group via the bot **mahfuztitasaiagent** — with your PC off.
+
+> 💡 To make group members see the name "mahfuztitasaiagent", set the **bot number's WhatsApp profile name** to `mahfuztitasaiagent`.
+
+---
+
 ## 9. File map
 ```
 server/
-  index.js          # Express server: POST /alerts → WhatsApp Cloud API
-  package.json      # deps (express, cors, dotenv)
-  .env.example      # copy to .env and fill in
-  README.md         # this guide
+  index.js               # Express: POST /alerts → WhatsApp Cloud API (+ /api/ping)
+  baileys-bridge.js      # WhatsApp BOT (group) via Baileys — port 4001
+  start-all.js           # runs index.js + baileys-bridge.js together
+  Dockerfile             # always-on container
+  docker-compose.yml     # one-command deploy
+  mtnoc-backend.service  # systemd auto-start (VM)
+  package.json           # deps
+  .env.example           # copy to .env and fill in
+  README.md              # this guide
 ```

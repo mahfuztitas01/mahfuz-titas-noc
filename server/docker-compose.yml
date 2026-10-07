@@ -1,0 +1,16 @@
+# Mahfuz Titas NOC — always-on backend + WhatsApp bot
+# Run:  docker compose up -d --build
+services:
+  mtnoc:
+    build: .
+    container_name: mtnoc
+    restart: unless-stopped
+    ports:
+      - '4000:4000' # Cloud API bridge + ping
+      - '4001:4001' # Baileys WhatsApp bot "mahfuztitasaiagent"
+    env_file:
+      - .env
+    volumes:
+      # persist WhatsApp login + joined group across restarts
+      - ./baileys_auth:/app/baileys_auth
+      - ./baileys_group.json:/app/baileys_group.json

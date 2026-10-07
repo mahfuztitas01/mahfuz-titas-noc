@@ -25,7 +25,7 @@ import makeWASocket, {
 } from '@whiskeysockets/baileys'
 import 'dotenv/config'
 
-const PORT = process.env.BAILEYS_PORT || 4001
+const PORT = process.env.PORT || process.env.BAILEYS_PORT || 4001
 const GROUP_FILE = 'baileys_group.json' // remembers the joined group
 const BOT_NAME = process.env.BOT_NAME || 'mahfuztitasaiagent'
 
