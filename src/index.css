@@ -1,0 +1,68 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: light;
+}
+
+html.dark {
+  color-scheme: dark;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  @apply bg-slate-100 text-slate-800 antialiased;
+  font-family: 'Inter', 'Segoe UI', system-ui, Arial, sans-serif;
+}
+
+html.dark body {
+  @apply bg-noc-bg text-slate-200;
+}
+
+/* Scrollbars */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-thumb {
+  @apply rounded-full bg-slate-300;
+}
+html.dark ::-webkit-scrollbar-thumb {
+  @apply bg-slate-700;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+@layer components {
+  .noc-card {
+    @apply rounded-xl border border-slate-200 bg-white shadow-card transition-shadow dark:border-noc-border dark:bg-noc-panel;
+  }
+  .noc-card-hover {
+    @apply hover:shadow-card-hover;
+  }
+  .noc-input {
+    @apply w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-800 outline-none transition focus:border-brand-500 focus:ring-2 focus:ring-brand-500/30 dark:border-noc-border dark:bg-noc-panel2 dark:text-slate-200;
+  }
+  .noc-label {
+    @apply mb-1 block text-xs font-medium text-slate-500 dark:text-slate-400;
+  }
+}
+
+/* Recharts tweaks */
+.recharts-default-tooltip {
+  border-radius: 0.5rem !important;
+  border: 1px solid rgba(148, 163, 184, 0.3) !important;
+}
+html.dark .recharts-cartesian-grid line {
+  stroke: #1e293b;
+}
+html.dark .recharts-text {
+  fill: #94a3b8;
+}
