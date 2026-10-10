@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import {
-  Settings as Cog, Network, Activity, Bell, Users, Code2, DatabaseBackup, Save, Download, Copy, Check, MessageCircle, Send,
+  Settings as Cog, Network, Activity, Bell, Users, Code2, DatabaseBackup, Save, Download, Copy, Check, Send,
 } from 'lucide-react'
 import Card from '../components/Card'
 import Button from '../components/Button'
@@ -70,15 +70,6 @@ export default function Settings() {
     push('Backend URL saved', 'success')
   }
 
-  const [botUrl, setBotUrl] = useState(() => {
-    try {
-      return localStorage.getItem('mtnoc_bot_url') || 'http://localhost:4001'
-    } catch {
-      return 'http://localhost:4001'
-    }
-  })
-  const [groupLink, setGroupLink] = useState('')
-  const [botStatus, setBotStatus] = useState('')
   const [tgStatus, setTgStatus] = useState('')
 
   const testTelegram = async () => {
@@ -108,38 +99,6 @@ export default function Settings() {
     } catch (err) {
       setTgStatus(`⚠️ ${err?.message || err}`)
       push('Telegram test failed', 'error')
-    }
-  }
-
-  const connectBot = async () => {
-    const base = botUrl.trim().replace(/\/$/, '')
-    try {
-      localStorage.setItem('mtnoc_bot_url', base)
-    } catch {
-      /* ignore */
-    }
-    if (!groupLink.trim()) {
-      push('Paste your WhatsApp group link first', 'error')
-      return
-    }
-    setBotStatus('Connecting…')
-    try {
-      const res = await fetch(`${base}/join`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ link: groupLink.trim() }),
-      })
-      const data = await res.json()
-      if (data.ok) {
-        setBotStatus(`✅ Bot joined: ${data.group?.name || data.group?.jid}`)
-        push('Bot connected to group', 'success')
-      } else {
-        setBotStatus(`⚠️ ${data.reason || data.error || 'failed'}`)
-        push('Bot connect failed', 'error')
-      }
-    } catch {
-      setBotStatus(`⚠️ Bot not reachable at ${base} — run: node baileys-bridge.js`)
-      push('Bot not reachable', 'error')
     }
   }
 
@@ -241,24 +200,14 @@ export default function Settings() {
           <Card title="Notifications" subtitle="Where alerts are delivered">
             <div className="divide-y divide-slate-100 dark:divide-noc-border/60">
               <Toggle checked={notif.email} onChange={(v) => setNotif({ ...notif, email: v })} label="Email alerts" description="Send alerts to the NOC distribution list" />
-              <Toggle checked={notif.telegram} onChange={(v) => setNotif({ ...notif, telegram: v })} label="Telegram" description="Push to the NOC Telegram chat" />
-              <Toggle checked={notif.whatsapp ?? true} onChange={(v) => setNotif({ ...notif, whatsapp: v })} label="WhatsApp (via backend)" description="Backend forwards alerts to WhatsApp Cloud API" />
-              <Toggle checked={notif.webhook} onChange={(v) => setNotif({ ...notif, webhook: v })} label="Webhook" description="POST alert payloads to an endpoint" />
+              <Toggle checked={notif.telegram} onChange={(v) => setNotif({ ...notif, telegram: v })} label="Telegram" description="Push alerts to your Telegram group" />
               <Toggle checked={notif.desktop} onChange={(v) => setNotif({ ...notif, desktop: v })} label="Desktop notifications" description="Show browser notifications" />
             </div>
             <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
               <Field label="Alert Email">
                 <input className="noc-input" value={notifCfg.email || ''} onChange={(e) => setNotifCfg({ ...notifCfg, email: e.target.value })} placeholder="noc@company.com" />
               </Field>
-              <Field label="Webhook URL (backend)">
-                <input className="noc-input" value={notifCfg.webhookUrl || ''} onChange={(e) => setNotifCfg({ ...notifCfg, webhookUrl: e.target.value })} placeholder="http://localhost:4000/alerts" />
-              </Field>
             </div>
-            <p className="mt-3 rounded-lg bg-slate-50 p-3 text-xs text-slate-500 dark:bg-noc-panel2 dark:text-slate-400">
-              Threshold alerts (bandwidth / latency / CPU / PPPoE) are POSTed to this Webhook URL. The included backend
-              (<code className="mx-1 rounded bg-slate-200 px-1 dark:bg-noc-border">server/</code>) forwards them to
-              <strong> WhatsApp Cloud API</strong>. See <code className="mx-1 rounded bg-slate-200 px-1 dark:bg-noc-border">server/README.md</code>.
-            </p>
 
             <div className="mt-5 rounded-lg border border-sky-200 bg-sky-50/50 p-4 dark:border-sky-500/20 dark:bg-sky-500/5">
               <div className="mb-2 flex items-center gap-2">
@@ -283,29 +232,6 @@ export default function Settings() {
                 chat ID from <code className="mx-1 rounded bg-slate-200 px-1 dark:bg-noc-border">@userinfobot</code> or the
                 <code className="mx-1 rounded bg-slate-200 px-1 dark:bg-noc-border">getUpdates</code> API. Alerts are sent
                 straight to Telegram from this site — works with no backend.
-              </p>
-            </div>
-
-            <div className="mt-5 rounded-lg border border-emerald-200 bg-emerald-50/50 p-4 dark:border-emerald-500/20 dark:bg-emerald-500/5">
-              <div className="mb-2 flex items-center gap-2">
-                <MessageCircle className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
-                <span className="text-sm font-semibold text-slate-700 dark:text-slate-200">WhatsApp Bot — mahfuztitasaiagent</span>
-              </div>
-              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                <Field label="Bot server URL">
-                  <input className="noc-input font-mono" value={botUrl} onChange={(e) => setBotUrl(e.target.value)} placeholder="http://localhost:4001" />
-                </Field>
-                <Field label="Your WhatsApp group link">
-                  <input className="noc-input" value={groupLink} onChange={(e) => setGroupLink(e.target.value)} placeholder="https://chat.whatsapp.com/XXXXXXXX" />
-                </Field>
-              </div>
-              <div className="mt-3 flex flex-wrap items-center gap-3">
-                <Button icon={MessageCircle} onClick={connectBot}>Connect bot to group</Button>
-                {botStatus && <span className="text-xs text-slate-500 dark:text-slate-400">{botStatus}</span>}
-              </div>
-              <p className="mt-2 text-[11px] text-slate-400">
-                Just paste your group link — the bot joins that group and forwards every NMS alert there. (Run the bot
-                once and scan the QR to log in.)
               </p>
             </div>
 

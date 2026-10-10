@@ -113,22 +113,6 @@ export async function dispatchAlert(alert, clientMeta = {}) {
     )
   }
 
-  if (cfg.webhookUrl) {
-    tasks.push(
-      fetch(cfg.webhookUrl, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(buildPayload(alert, clientMeta)),
-      })
-        .then((res) => {
-          results.webhook = { ok: res.ok, status: res.status }
-        })
-        .catch((err) => {
-          results.webhook = { ok: false, error: String(err) }
-        })
-    )
-  }
-
   if (!tasks.length) return { skipped: true }
   await Promise.all(tasks)
   return results
