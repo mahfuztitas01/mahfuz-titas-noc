@@ -1,0 +1,21 @@
+import{c as r,b as j,r as l,x as c,j as e,F as k,y as g}from"./index-LYbKN2Ae.js";import{C as x}from"./Card-Dk7gKk6C.js";import{B as d}from"./Button-C8o4Nosf.js";/**
+ * @license lucide-react v0.454.0 - ISC
+ *
+ * This source code is licensed under the ISC license.
+ * See the LICENSE file in the root directory of this source tree.
+ */const m=r("Calendar",[["path",{d:"M8 2v4",key:"1cmpym"}],["path",{d:"M16 2v4",key:"4m81vk"}],["rect",{width:"18",height:"18",x:"3",y:"4",rx:"2",key:"1hopcy"}],["path",{d:"M3 10h18",key:"8toen8"}]]);/**
+ * @license lucide-react v0.454.0 - ISC
+ *
+ * This source code is licensed under the ISC license.
+ * See the LICENSE file in the root directory of this source tree.
+ */const N=r("ChartColumn",[["path",{d:"M3 3v16a2 2 0 0 0 2 2h16",key:"c24i48"}],["path",{d:"M18 17V9",key:"2bz60n"}],["path",{d:"M13 17V5",key:"1frdt8"}],["path",{d:"M8 17v-3",key:"17ska0"}]]);/**
+ * @license lucide-react v0.454.0 - ISC
+ *
+ * This source code is licensed under the ISC license.
+ * See the LICENSE file in the root directory of this source tree.
+ */const b=r("FileDown",[["path",{d:"M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z",key:"1rqfz7"}],["path",{d:"M14 2v4a2 2 0 0 0 2 2h4",key:"tnqrlb"}],["path",{d:"M12 18v-6",key:"17g6i2"}],["path",{d:"m9 15 3 3 3-3",key:"1npd3o"}]]);/**
+ * @license lucide-react v0.454.0 - ISC
+ *
+ * This source code is licensed under the ISC license.
+ * See the LICENSE file in the root directory of this source tree.
+ */const f=r("FileSpreadsheet",[["path",{d:"M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z",key:"1rqfz7"}],["path",{d:"M14 2v4a2 2 0 0 0 2 2h4",key:"tnqrlb"}],["path",{d:"M8 13h2",key:"yr2amv"}],["path",{d:"M14 13h2",key:"un5t4a"}],["path",{d:"M8 17h2",key:"2yhykz"}],["path",{d:"M14 17h2",key:"10kma7"}]]);function S(){const{push:n}=j(),[o,u]=l.useState("2026-09-01"),[i,v]=l.useState("2026-09-30"),[s,h]=l.useState(c[0]),[t,p]=l.useState(!1),y=()=>{p(!0),n(`Generated "${s}" for ${o} → ${i}`,"success")};return e.jsxs("div",{className:"space-y-6",children:[e.jsxs(x,{title:"Report Parameters",subtitle:"Select report type and date range",children:[e.jsxs("div",{className:"grid grid-cols-1 gap-4 sm:grid-cols-4",children:[e.jsxs("div",{className:"sm:col-span-2",children:[e.jsx("label",{className:"noc-label",children:"Report Type"}),e.jsx("select",{className:"noc-input",value:s,onChange:a=>h(a.target.value),children:c.map(a=>e.jsx("option",{children:a},a))})]}),e.jsxs("div",{children:[e.jsx("label",{className:"noc-label",children:"From"}),e.jsxs("div",{className:"relative",children:[e.jsx(m,{className:"pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400"}),e.jsx("input",{type:"date",className:"noc-input pl-9",value:o,onChange:a=>u(a.target.value)})]})]}),e.jsxs("div",{children:[e.jsx("label",{className:"noc-label",children:"To"}),e.jsxs("div",{className:"relative",children:[e.jsx(m,{className:"pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400"}),e.jsx("input",{type:"date",className:"noc-input pl-9",value:i,onChange:a=>v(a.target.value)})]})]})]}),e.jsxs("div",{className:"mt-4 flex flex-wrap gap-2",children:[e.jsx(d,{icon:N,onClick:y,children:"Generate Report"}),e.jsx(d,{variant:"outline",icon:b,disabled:!t,onClick:()=>n("Exported report as PDF","success"),children:"Export PDF"}),e.jsx(d,{variant:"outline",icon:f,disabled:!t,onClick:()=>n("Exported report as CSV","success"),children:"Export CSV"})]})]}),e.jsx("div",{className:"grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3",children:c.map(a=>e.jsx(x,{className:"cursor-pointer",children:e.jsxs("div",{onClick:()=>{h(a),p(!1)},className:"flex items-start gap-3",children:[e.jsx("span",{className:"rounded-lg bg-brand-50 p-2 text-brand-600 dark:bg-brand-500/10 dark:text-brand-400",children:e.jsx(k,{className:"h-4 w-4"})}),e.jsxs("div",{className:"flex-1",children:[e.jsx("h3",{className:"text-sm font-semibold text-slate-800 dark:text-slate-100",children:a}),e.jsx("p",{className:"mt-0.5 text-xs text-slate-500 dark:text-slate-400",children:s===a&&t?"Generated":"Ready to generate"})]}),s===a&&t&&e.jsx(g,{className:"h-4 w-4 text-emerald-500"})]})},a))})]})}export{S as default};
