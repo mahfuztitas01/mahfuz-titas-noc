@@ -15,6 +15,7 @@ import DonutChart from '../charts/DonutChart'
 import { useLive, useLiveDevices } from '../hooks/useLiveData'
 import { useAlertEngine } from '../hooks/useAlertEngine'
 import { usePingStatus } from '../hooks/usePingStatus'
+import { useDeviceDownAlerts } from '../hooks/useDeviceDownAlerts'
 import { useClient } from '../context/ClientContext'
 import { useToast } from '../components/Toast'
 import { generateTraffic } from '../data/mockData'
@@ -33,14 +34,41 @@ export default function Dashboard() {
   )
   const deviceList = useLiveDevices(data.devices, 4000)
   const { status: pingStatus, reachable: pingReachable } = usePingStatus(deviceList)
-  const onlineCount = deviceList.filter((d) => (pingStatus[d.id] || d.status) === 'online').length
+  const [simDown, setSimDown] = useState({})
+  const effectiveStatus = useMemo(() => {
+    const m = { ...pingStatus }
+    Object.keys(simDown).forEach((id) => {
+      m[id] = 'offline'
+    })
+    return m
+  }, [pingStatus, simDown])
+  const onlineCount = deviceList.filter((d) => (effectiveStatus[d.id] || d.status) === 'online').length
   const clientMeta = useMemo(
     () => ({ id: client.id, name: client.name, short: client.short, whatsapp: client.whatsapp }),
     [client]
   )
   const { alerts, setStatus } = useAlertEngine(live, data.alerts, client.id, clientMeta)
+  // Device-down detector: 20s offline -> Telegram/webhook alert.
+  useDeviceDownAlerts(deviceList, effectiveStatus, clientMeta)
   const { push } = useToast()
   const [range, setRange] = useState('24H')
+
+  const simulateDown = () => {
+    const dev = deviceList.find((d) => !simDown[d.id])
+    if (!dev) {
+      push('All devices are already simulated down', 'info')
+      return
+    }
+    setSimDown((s) => ({ ...s, [dev.id]: true }))
+    push(`Simulating ${dev.name} down for 30s — alert fires at 20s`, 'info')
+    setTimeout(() => {
+      setSimDown((s) => {
+        const n = { ...s }
+        delete n[dev.id]
+        return n
+      })
+    }, 30000)
+  }
 
   const traffic = useMemo(() => generateTraffic(range), [range])
 
@@ -129,11 +157,23 @@ export default function Dashboard() {
           </ul>
         </Card>
 
-        <Card title="Network Health" subtitle={`${client.short} live device status`}>
+        <Card
+          title="Network Health"
+          subtitle={`${client.short} live device status`}
+          action={
+            <button
+              onClick={simulateDown}
+              className="rounded-lg border border-slate-200 px-2.5 py-1 text-xs font-medium text-slate-500 hover:bg-slate-50 dark:border-noc-border dark:text-slate-300 dark:hover:bg-noc-panel2"
+              title="Send a device down for 30s to test the 20s down alert"
+            >
+              Simulate device down
+            </button>
+          }
+        >
           <ul className="divide-y divide-slate-100 dark:divide-noc-border/60">
             {deviceList.map((d) => {
               const Icon = getCategoryIcon(d.category || d.type)
-              const st = pingStatus[d.id] || d.status
+              const st = effectiveStatus[d.id] || d.status
               return (
                 <li key={d.id} className="flex items-center gap-3 py-3 first:pt-0 last:pb-0">
                   <DeviceIcon category={d.category} status={st} size={36} />
