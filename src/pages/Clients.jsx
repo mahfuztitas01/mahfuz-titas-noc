@@ -304,11 +304,18 @@ export default function Clients() {
               <Send className="h-4 w-4 text-sky-600 dark:text-sky-400" />
               <span className="text-sm font-semibold text-slate-700 dark:text-slate-200">Telegram group — alerts here</span>
             </div>
-            <label className="noc-label">Telegram group link (or chat ID)</label>
-            <input className="noc-input font-mono" value={form.telegramChatId} onChange={(e) => setForm({ ...form, telegramChatId: e.target.value })} placeholder="https://t.me/+xxxxxxxx" />
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+              <div>
+                <label className="noc-label">Group name</label>
+                <input className="noc-input" value={form.telegramGroupName} onChange={(e) => setForm({ ...form, telegramGroupName: e.target.value })} placeholder="Rony Bhai ISP Kushtia Alerts" />
+              </div>
+              <div>
+                <label className="noc-label">Telegram group link (or chat ID)</label>
+                <input className="noc-input font-mono" value={form.telegramChatId} onChange={(e) => setForm({ ...form, telegramChatId: e.target.value })} placeholder="https://t.me/+xxxxxxxx" />
+              </div>
+            </div>
             <div className="mt-2 flex flex-wrap items-center gap-3">
               <Button size="sm" icon={RefreshCw} onClick={connectTelegram}>Connect bot to group</Button>
-              {form.telegramGroupName && <span className="text-xs font-medium text-sky-700 dark:text-sky-300">Group: {form.telegramGroupName}</span>}
             </div>
             {tgStatus && <p className="mt-1 text-[11px] text-slate-500 dark:text-slate-400">{tgStatus}</p>}
             <p className="mt-2 text-[11px] text-slate-400">
