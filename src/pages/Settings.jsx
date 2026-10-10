@@ -1,13 +1,13 @@
 import { useState } from 'react'
 import {
-  Settings as Cog, Network, Activity, Bell, Users, Code2, DatabaseBackup, Save, Download, Copy, Check, MessageCircle,
+  Settings as Cog, Network, Activity, Bell, Users, Code2, DatabaseBackup, Save, Download, Copy, Check, MessageCircle, Send,
 } from 'lucide-react'
 import Card from '../components/Card'
 import Button from '../components/Button'
 import { BRAND } from '../config/branding'
 import { useToast } from '../components/Toast'
 import { classes } from '../utils/format'
-import { getNotifyConfig, saveNotifyConfig } from '../services/notifications'
+import { getNotifyConfig, saveNotifyConfig, sendTelegram } from '../services/notifications'
 
 const SECTIONS = [
   { key: 'general', label: 'General', icon: Cog },
@@ -79,6 +79,37 @@ export default function Settings() {
   })
   const [groupLink, setGroupLink] = useState('')
   const [botStatus, setBotStatus] = useState('')
+  const [tgStatus, setTgStatus] = useState('')
+
+  const testTelegram = async () => {
+    const token = (notifCfg.telegramToken || '').trim()
+    const chat = (notifCfg.telegramChatId || '').trim()
+    if (!token || !chat) {
+      push('Enter your Telegram bot token and chat ID first', 'error')
+      return
+    }
+    setTgStatus('Sending…')
+    try {
+      await sendTelegram(
+        token,
+        chat,
+        {
+          severity: 'critical',
+          title: 'Test alert — high CPU utilization',
+          device: 'CORE-RT-1',
+          time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+          description: 'This is a test alert from Mahfuz Titas NOC. Your Telegram alerts are working.',
+        },
+        { name: 'Test Client' }
+      )
+      saveNotifyConfig(notifCfg)
+      setTgStatus('✅ Test sent — check your Telegram')
+      push('Telegram test sent', 'success')
+    } catch (err) {
+      setTgStatus(`⚠️ ${err?.message || err}`)
+      push('Telegram test failed', 'error')
+    }
+  }
 
   const connectBot = async () => {
     const base = botUrl.trim().replace(/\/$/, '')
@@ -228,6 +259,32 @@ export default function Settings() {
               (<code className="mx-1 rounded bg-slate-200 px-1 dark:bg-noc-border">server/</code>) forwards them to
               <strong> WhatsApp Cloud API</strong>. See <code className="mx-1 rounded bg-slate-200 px-1 dark:bg-noc-border">server/README.md</code>.
             </p>
+
+            <div className="mt-5 rounded-lg border border-sky-200 bg-sky-50/50 p-4 dark:border-sky-500/20 dark:bg-sky-500/5">
+              <div className="mb-2 flex items-center gap-2">
+                <Send className="h-4 w-4 text-sky-600 dark:text-sky-400" />
+                <span className="text-sm font-semibold text-slate-700 dark:text-slate-200">Telegram Alerts — no server / VM needed</span>
+              </div>
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                <Field label="Bot token">
+                  <input className="noc-input font-mono" value={notifCfg.telegramToken || ''} onChange={(e) => setNotifCfg({ ...notifCfg, telegramToken: e.target.value })} placeholder="123456789:AAExxxxxxxxxxxxxxxxxxxxxxx" />
+                </Field>
+                <Field label="Chat ID">
+                  <input className="noc-input font-mono" value={notifCfg.telegramChatId || ''} onChange={(e) => setNotifCfg({ ...notifCfg, telegramChatId: e.target.value })} placeholder="-1001234567890" />
+                </Field>
+              </div>
+              <div className="mt-3 flex flex-wrap items-center gap-3">
+                <Button icon={Send} onClick={testTelegram}>Send test alert</Button>
+                <Button variant="outline" icon={Save} onClick={saveNotify}>Save</Button>
+                {tgStatus && <span className="text-xs text-slate-500 dark:text-slate-400">{tgStatus}</span>}
+              </div>
+              <p className="mt-2 text-[11px] text-slate-400">
+                Create a bot with <strong>@BotFather</strong> → copy the token. Add the bot to your group/channel, then get the
+                chat ID from <code className="mx-1 rounded bg-slate-200 px-1 dark:bg-noc-border">@userinfobot</code> or the
+                <code className="mx-1 rounded bg-slate-200 px-1 dark:bg-noc-border">getUpdates</code> API. Alerts are sent
+                straight to Telegram from this site — works with no backend.
+              </p>
+            </div>
 
             <div className="mt-5 rounded-lg border border-emerald-200 bg-emerald-50/50 p-4 dark:border-emerald-500/20 dark:bg-emerald-500/5">
               <div className="mb-2 flex items-center gap-2">
