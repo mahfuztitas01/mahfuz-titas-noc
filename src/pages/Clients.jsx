@@ -20,7 +20,7 @@ export default function Clients() {
   const navigate = useNavigate()
 
   const [editing, setEditing] = useState(null)
-  const [form, setForm] = useState({ groupName: '', groupLink: '', whatsapp: '', contact: '', region: '', plan: 'Business' })
+  const [form, setForm] = useState({ name: '', short: '', groupName: '', groupLink: '', whatsapp: '', contact: '', region: '', plan: 'Business' })
 
   const enriched = useMemo(() => clients.map((c) => ({ ...c, data: buildClientData(c) })), [clients])
 
@@ -35,6 +35,8 @@ export default function Clients() {
   const startEdit = (c) => {
     setEditing(c)
     setForm({
+      name: c.name || '',
+      short: c.short || '',
       groupName: c.groupName || `${c.short} NOC Group`,
       groupLink: c.groupLink || '',
       whatsapp: c.whatsapp || '',
@@ -46,7 +48,10 @@ export default function Clients() {
 
   const saveEdit = () => {
     if (editing) {
+      const name = form.name.trim() || editing.name
       updateContact(editing.id, {
+        name,
+        short: (form.short.trim() || editing.short).toUpperCase(),
         groupName: form.groupName.trim(),
         groupLink: form.groupLink.trim(),
         whatsapp: form.whatsapp.trim(),
@@ -54,7 +59,7 @@ export default function Clients() {
         region: form.region.trim(),
         plan: form.plan,
       })
-      push(`Saved WhatsApp group for ${editing.name}`, 'success')
+      push(`Saved ${name}`, 'success')
     }
     setEditing(null)
   }
@@ -196,6 +201,14 @@ export default function Clients() {
         }
       >
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <div className="sm:col-span-2">
+            <label className="noc-label">ISP name</label>
+            <input className="noc-input" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="Rahim ISP Networks" />
+          </div>
+          <div>
+            <label className="noc-label">Short code</label>
+            <input className="noc-input" value={form.short} onChange={(e) => setForm({ ...form, short: e.target.value.toUpperCase() })} maxLength={4} placeholder="RIM" />
+          </div>
           <div>
             <label className="noc-label">Group name</label>
             <input className="noc-input" value={form.groupName} onChange={(e) => setForm({ ...form, groupName: e.target.value })} placeholder="RIM NOC Group" />
