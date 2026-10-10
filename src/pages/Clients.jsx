@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
   Building2, Network, Gauge, Users, AlertTriangle, ArrowRight, Activity,
-  Pencil, Save, Send, RefreshCw,
+  Pencil, Save, Send, RefreshCw, Plus, Trash2,
 } from 'lucide-react'
 import Card from '../components/Card'
 import Button from '../components/Button'
@@ -19,10 +19,11 @@ import { resolveTelegramChat } from '../services/telegram'
 const EMPTY_FORM = { name: '', short: '', contact: '', region: '', plan: 'Business', telegramChatId: '', telegramToken: '', telegramGroupName: '' }
 
 export default function Clients() {
-  const { clients, clientId, setClientId, updateContact } = useClient()
+  const { clients, clientId, setClientId, updateContact, addClient, removeClient } = useClient()
   const { push } = useToast()
   const navigate = useNavigate()
 
+  const [mode, setMode] = useState(null) // 'add' | 'edit' | null
   const [editing, setEditing] = useState(null)
   const [form, setForm] = useState(EMPTY_FORM)
   const [tgStatus, setTgStatus] = useState('')
@@ -37,7 +38,15 @@ export default function Clients() {
     navigate(to)
   }
 
+  const startAdd = () => {
+    setMode('add')
+    setEditing(null)
+    setTgStatus('')
+    setForm(EMPTY_FORM)
+  }
+
   const startEdit = (c) => {
+    setMode('edit')
     setEditing(c)
     setTgStatus('')
     setForm({
@@ -52,22 +61,45 @@ export default function Clients() {
     })
   }
 
-  const saveEdit = () => {
-    if (editing) {
+  const closeModal = () => {
+    setMode(null)
+    setEditing(null)
+  }
+
+  const saveModal = () => {
+    const tg = {
+      telegramChatId: form.telegramChatId.trim(),
+      telegramToken: form.telegramToken.trim(),
+      telegramGroupName: form.telegramGroupName.trim(),
+    }
+    if (mode === 'add') {
+      if (!form.name.trim()) {
+        push('Enter an ISP name', 'error')
+        return
+      }
+      const created = addClient({ name: form.name, short: form.short, region: form.region, plan: form.plan, contact: form.contact })
+      updateContact(created.id, tg)
+      push(`Added ${created.name}`, 'success')
+      setClientId(created.id)
+    } else if (mode === 'edit' && editing) {
       const name = form.name.trim() || editing.name
       updateContact(editing.id, {
         name,
-        short: (form.short.trim() || editing.short).toUpperCase(),
+        short: (form.short.trim() || editing.short || '').toUpperCase(),
         contact: form.contact.trim(),
         region: form.region.trim(),
         plan: form.plan,
-        telegramChatId: form.telegramChatId.trim(),
-        telegramToken: form.telegramToken.trim(),
-        telegramGroupName: form.telegramGroupName.trim(),
+        ...tg,
       })
       push(`Saved ${name}`, 'success')
     }
-    setEditing(null)
+    closeModal()
+  }
+
+  const onDelete = (c) => {
+    if (!window.confirm(`Delete "${c.name}"? It will be removed from monitoring.`)) return
+    removeClient(c.id)
+    push(`Deleted ${c.name}`, 'success')
   }
 
   const connectTelegram = async () => {
@@ -93,6 +125,15 @@ export default function Clients() {
 
   return (
     <div className="space-y-6">
+      {/* header */}
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <h2 className="text-lg font-bold text-slate-900 dark:text-white">ISP Clients</h2>
+          <p className="text-xs text-slate-500 dark:text-slate-400">Add, edit and remove the ISPs you monitor</p>
+        </div>
+        <Button icon={Plus} onClick={startAdd}>Add Client</Button>
+      </div>
+
       {/* summary */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-4">
         <Card>
@@ -158,6 +199,13 @@ export default function Clients() {
                   >
                     <Pencil className="h-4 w-4" />
                   </button>
+                  <button
+                    onClick={() => onDelete(c)}
+                    className="rounded-md p-1.5 text-slate-400 hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-500/10"
+                    title="Delete client"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </button>
                 </div>
               </div>
 
@@ -208,17 +256,26 @@ export default function Clients() {
             </Card>
           )
         })}
+
+        {/* add card */}
+        <button
+          onClick={startAdd}
+          className="flex min-h-[220px] flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-slate-300 text-slate-400 transition hover:border-brand-400 hover:text-brand-600 dark:border-noc-border dark:hover:border-brand-500"
+        >
+          <Plus className="h-7 w-7" />
+          <span className="text-sm font-medium">Add ISP Client</span>
+        </button>
       </div>
 
-      {/* edit modal */}
+      {/* add / edit modal */}
       <Modal
-        open={!!editing}
-        onClose={() => setEditing(null)}
-        title={editing ? `Edit — ${editing.name}` : 'Edit client'}
+        open={mode !== null}
+        onClose={closeModal}
+        title={mode === 'add' ? 'Add ISP client' : editing ? `Edit — ${editing.name}` : 'Edit client'}
         footer={
           <>
-            <Button variant="outline" onClick={() => setEditing(null)}>Cancel</Button>
-            <Button icon={Save} onClick={saveEdit}>Save</Button>
+            <Button variant="outline" onClick={closeModal}>Cancel</Button>
+            <Button icon={Save} onClick={saveModal}>{mode === 'add' ? 'Add Client' : 'Save'}</Button>
           </>
         }
       >
