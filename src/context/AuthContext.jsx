@@ -10,7 +10,10 @@ import { CLIENTS } from '../data/clients'
 // ---------------------------------------------------------------------------
 
 const USERS_KEY = 'mtnoc_users_v2'
-const SESSION_KEY = 'mtnoc_session_v2'
+// Only "Remember me" sessions are persisted (localStorage). A normal sign-in
+// lives in memory only, so opening/pasting the site link always shows Login.
+const SESSION_KEY = 'mtnoc_session_v3'
+const LEGACY_SESSION_KEY = 'mtnoc_session_v2'
 
 const TEAM_USERS = [
   { id: 1, name: 'Mahfuz Titas', username: 'mahfuz', email: 'mahfuz@noc.local', role: 'Super Admin', status: 'active', password: 'admin123', clientId: null, lastLogin: 'Today, 09:12' },
@@ -47,6 +50,16 @@ const AuthContext = createContext(null)
 export function AuthProvider({ children }) {
   const [users, setUsers] = useState(() => load(USERS_KEY, SEED_USERS))
   const [currentUser, setCurrentUser] = useState(() => load(SESSION_KEY, null))
+  const [remember, setRemember] = useState(() => Boolean(load(SESSION_KEY, null)))
+
+  // Clear the old always-persistent session so visitors land on the Login page.
+  useEffect(() => {
+    try {
+      localStorage.removeItem(LEGACY_SESSION_KEY)
+    } catch {
+      /* ignore */
+    }
+  }, [])
 
   useEffect(() => {
     try {
@@ -58,14 +71,14 @@ export function AuthProvider({ children }) {
 
   useEffect(() => {
     try {
-      if (currentUser) localStorage.setItem(SESSION_KEY, JSON.stringify(currentUser))
+      if (currentUser && remember) localStorage.setItem(SESSION_KEY, JSON.stringify(currentUser))
       else localStorage.removeItem(SESSION_KEY)
     } catch {
       /* ignore */
     }
-  }, [currentUser])
+  }, [currentUser, remember])
 
-  const login = (username, password) => {
+  const login = (username, password, rememberMe = false) => {
     const key = String(username || '').trim().toLowerCase()
     const user = users.find((u) => u.username.toLowerCase() === key || (u.email || '').toLowerCase() === key)
     if (!user) return { ok: false, error: 'No account found for that username/email' }
@@ -80,12 +93,16 @@ export function AuthProvider({ children }) {
       clientId: user.clientId || null,
       isClient: user.role === 'Client' && !!user.clientId,
     }
+    setRemember(Boolean(rememberMe))
     setCurrentUser(session)
     setUsers((prev) => prev.map((u) => (u.id === user.id ? { ...u, lastLogin: 'Just now' } : u)))
     return { ok: true, user: session }
   }
 
-  const logout = () => setCurrentUser(null)
+  const logout = () => {
+    setRemember(false)
+    setCurrentUser(null)
+  }
 
   const addUser = (data) => setUsers((prev) => [...prev, { ...data, id: Date.now(), lastLogin: 'Never' }])
   const updateUser = (id, patch) => setUsers((prev) => prev.map((u) => (u.id === id ? { ...u, ...patch } : u)))

@@ -20,7 +20,7 @@ export default function Login() {
   const { push } = useToast()
   const { currentUser, login } = useAuth()
   const [show, setShow] = useState(false)
-  const [remember, setRemember] = useState(true)
+  const [remember, setRemember] = useState(false)
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
 
@@ -33,7 +33,7 @@ export default function Login() {
       push('Please enter username and password', 'error')
       return
     }
-    const res = login(username, password)
+    const res = login(username, password, remember)
     if (!res.ok) {
       push(res.error, 'error')
       return
