@@ -33,7 +33,7 @@ export default function Dashboard() {
     client.id
   )
   const deviceList = useLiveDevices(data.devices, 4000)
-  const { status: pingStatus, reachable: pingReachable } = usePingStatus(deviceList)
+  const { status: pingStatus, reachable: pingReachable, configured: pingConfigured } = usePingStatus(deviceList)
   const [simDown, setSimDown] = useState({})
   const effectiveStatus = useMemo(() => {
     const m = { ...pingStatus }
@@ -103,7 +103,7 @@ export default function Dashboard() {
 
       {/* Stat cards */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <StatCard icon={Network} tone={onlineCount > 0 ? 'success' : 'critical'} label="Online Devices" value={onlineCount} sub={`${data.devices.length} total · ${pingReachable ? 'live ping' : 'backend offline'}`} />
+        <StatCard icon={Network} tone={onlineCount > 0 ? 'success' : 'critical'} label="Online Devices" value={onlineCount} sub={`${data.devices.length} total · ${pingConfigured ? (pingReachable ? 'live ping' : 'backend offline') : 'demo data'}`} />
         <StatCard icon={Activity} tone="success" label="Total Bandwidth" value={Math.round(live.bandwidth)} unit="Mbps" sub="Current Traffic" />
         <StatCard icon={AlertTriangle} tone={openAlerts.length ? 'warning' : 'success'} label="Active Alerts" value={openAlerts.length} sub="Auto-generated from thresholds" />
         <StatCard icon={Users} tone="info" label="Active PPPoE Users" value={`${live.pppoeActive} / ${data.pppoe?.total ?? data.kpis.pppoe.total}`} sub="Active Users" />

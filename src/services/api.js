@@ -34,8 +34,21 @@ export const api = {
   getTopology: () => respond(mock.topology),
 }
 
-// Real backend base URL (WhatsApp bridge + ping service).
-// Resolved at runtime: Settings value (localStorage) → build env → localhost.
+// Real backend base URL (optional ping service).
+// When nothing is configured the app runs fully on simulated demo data and
+// never contacts a backend, so no failed network requests appear in the
+// browser console ("backend offline" leftovers are gone).
+export function isBackendConfigured() {
+  try {
+    const v = localStorage.getItem('mtnoc_backend')
+    if (v && v.trim()) return true
+  } catch {
+    /* ignore */
+  }
+  return Boolean(import.meta.env.VITE_BACKEND_URL)
+}
+
+// Resolved at runtime: Settings value (localStorage) → build env.
 export function getBackendUrl() {
   try {
     const v = localStorage.getItem('mtnoc_backend')
@@ -46,17 +59,21 @@ export function getBackendUrl() {
   return import.meta.env.VITE_BACKEND_URL || 'http://localhost:4000'
 }
 
-export const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:4000'
+export const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || ''
 
 // Ping a list of device hosts from the backend; returns per-host online/offline.
+// If no backend is configured this resolves immediately WITHOUT any network
+// request, keeping the dashboard error-free in demo mode.
 export async function pingHosts(hosts) {
+  if (!isBackendConfigured()) return { configured: false, results: [] }
   const res = await fetch(`${getBackendUrl()}/api/ping`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ hosts }),
   })
   if (!res.ok) throw new Error(`ping failed: ${res.status}`)
-  return res.json()
+  const data = await res.json()
+  return { configured: true, results: data.results || [] }
 }
 
 // Real WebSocket helper (unused until backend exists).

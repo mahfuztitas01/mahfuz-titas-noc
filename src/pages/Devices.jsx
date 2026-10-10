@@ -21,7 +21,7 @@ export default function Devices() {
   const { push } = useToast()
   const { client, data, saveDevices } = useClient()
   const list = data.devices
-  const { status: liveStatus, reachable, checking } = usePingStatus(list)
+  const { status: liveStatus, reachable, checking, configured } = usePingStatus(list)
   const [modal, setModal] = useState(null) // {mode:'add'|'edit'}
   const [form, setForm] = useState(emptyForm)
   const [details, setDetails] = useState(null)
@@ -105,11 +105,11 @@ export default function Devices() {
 
       <Card
         title={`Local Devices — ${client.short}`}
-        subtitle={`${list.length} devices · ${reachable ? 'live ping from your PC' : 'backend offline — showing last known'}`}
+        subtitle={`${list.length} devices · ${configured ? (reachable ? 'live ping from your PC' : 'backend offline — showing last known') : 'demo data (simulated)'}`}
         action={
-          <span className={'inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium ' + (reachable ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400' : 'bg-amber-50 text-amber-700 dark:bg-amber-500/10 dark:text-amber-400')}>
-            <span className={'h-2 w-2 rounded-full ' + (checking ? 'bg-amber-500 animate-pulse' : reachable ? 'bg-emerald-500' : 'bg-red-500')} />
-            {checking ? 'Pinging…' : reachable ? 'Live' : 'Offline'}
+          <span className={'inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium ' + (!configured ? 'bg-sky-50 text-sky-700 dark:bg-sky-500/10 dark:text-sky-400' : reachable ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400' : 'bg-amber-50 text-amber-700 dark:bg-amber-500/10 dark:text-amber-400')}>
+            <span className={'h-2 w-2 rounded-full ' + (!configured ? 'bg-sky-500' : checking ? 'bg-amber-500 animate-pulse' : reachable ? 'bg-emerald-500' : 'bg-red-500')} />
+            {!configured ? 'Demo' : checking ? 'Pinging…' : reachable ? 'Live' : 'Offline'}
           </span>
         }
       >
