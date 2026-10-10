@@ -96,9 +96,14 @@ export async function dispatchAlert(alert, clientMeta = {}) {
   const tasks = []
   const results = {}
 
-  if (telegramConfigured(cfg)) {
+  // Per-client Telegram (set in Clients edit) takes priority over the global
+  // Settings config. This lets each ISP's alerts go to their own group.
+  const tgToken = (clientMeta.telegramToken || cfg.telegramToken || '').trim()
+  const tgChat = (clientMeta.telegramChatId || cfg.telegramChatId || '').trim()
+
+  if (tgToken && tgChat) {
     tasks.push(
-      sendTelegram(cfg.telegramToken, cfg.telegramChatId, alert, clientMeta)
+      sendTelegram(tgToken, tgChat, alert, clientMeta)
         .then(() => {
           results.telegram = { ok: true }
         })

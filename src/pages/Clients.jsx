@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
   Building2, Network, Gauge, Users, AlertTriangle, ArrowRight, Activity,
-  Pencil, MessageCircle, Save,
+  Pencil, MessageCircle, Save, Send,
 } from 'lucide-react'
 import Card from '../components/Card'
 import Button from '../components/Button'
@@ -20,7 +20,7 @@ export default function Clients() {
   const navigate = useNavigate()
 
   const [editing, setEditing] = useState(null)
-  const [form, setForm] = useState({ name: '', short: '', groupName: '', groupLink: '', whatsapp: '', contact: '', region: '', plan: 'Business' })
+  const [form, setForm] = useState({ name: '', short: '', groupName: '', groupLink: '', whatsapp: '', contact: '', region: '', plan: 'Business', telegramChatId: '', telegramToken: '' })
 
   const enriched = useMemo(() => clients.map((c) => ({ ...c, data: buildClientData(c) })), [clients])
 
@@ -43,6 +43,8 @@ export default function Clients() {
       contact: c.contact || '',
       region: c.region || '',
       plan: c.plan || 'Business',
+      telegramChatId: c.telegramChatId || '',
+      telegramToken: c.telegramToken || '',
     })
   }
 
@@ -58,6 +60,8 @@ export default function Clients() {
         contact: form.contact.trim(),
         region: form.region.trim(),
         plan: form.plan,
+        telegramChatId: form.telegramChatId.trim(),
+        telegramToken: form.telegramToken.trim(),
       })
       push(`Saved ${name}`, 'success')
     }
@@ -231,6 +235,27 @@ export default function Clients() {
             <p className="mt-1 text-[11px] text-slate-400">
               Alerts are delivered to <strong>this group</strong> (broadcast to these members), not to personal numbers.
               Create the group in WhatsApp, add the client + NOC engineers, then paste the member numbers here.
+            </p>
+          </div>
+          <div className="sm:col-span-2 rounded-lg border border-sky-200 bg-sky-50/50 p-3 dark:border-sky-500/20 dark:bg-sky-500/5">
+            <div className="mb-2 flex items-center gap-2">
+              <Send className="h-4 w-4 text-sky-600 dark:text-sky-400" />
+              <span className="text-sm font-semibold text-slate-700 dark:text-slate-200">Telegram group — alerts here</span>
+            </div>
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+              <div>
+                <label className="noc-label">Telegram group chat ID</label>
+                <input className="noc-input font-mono" value={form.telegramChatId} onChange={(e) => setForm({ ...form, telegramChatId: e.target.value })} placeholder="-1001234567890" />
+              </div>
+              <div>
+                <label className="noc-label">Telegram bot token (optional)</label>
+                <input className="noc-input font-mono" value={form.telegramToken} onChange={(e) => setForm({ ...form, telegramToken: e.target.value })} placeholder="leave empty to use Settings" />
+              </div>
+            </div>
+            <p className="mt-1 text-[11px] text-slate-400">
+              Add your bot to a Telegram group, get the group chat ID (e.g. via <strong>@userinfobot</strong>) and paste it here.
+              This client's alerts — including the <strong>20s device-down</strong> alert — go to this Telegram group. Bot token is
+              optional: leave empty to use the one in Settings → Notifications.
             </p>
           </div>
           <div>

@@ -44,7 +44,14 @@ export default function Dashboard() {
   }, [pingStatus, simDown])
   const onlineCount = deviceList.filter((d) => (effectiveStatus[d.id] || d.status) === 'online').length
   const clientMeta = useMemo(
-    () => ({ id: client.id, name: client.name, short: client.short, whatsapp: client.whatsapp }),
+    () => ({
+      id: client.id,
+      name: client.name,
+      short: client.short,
+      whatsapp: client.whatsapp,
+      telegramChatId: client.telegramChatId,
+      telegramToken: client.telegramToken,
+    }),
     [client]
   )
   const { alerts, setStatus } = useAlertEngine(live, data.alerts, client.id, clientMeta)
