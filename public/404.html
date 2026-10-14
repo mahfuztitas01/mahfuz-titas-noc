@@ -3,17 +3,18 @@
   <head>
     <meta charset="utf-8" />
     <title>Mahfuz Titas NOC</title>
-    <!-- GitHub Pages SPA fallback: deep links redirect back into the app -->
+    <!-- SPA fallback for static hosting. The app uses HashRouter, so unmatched
+         paths are redirected into the app's hash route (e.g. /repo/#/clients). -->
     <script>
-      var pathSegmentsToKeep = 1
-      var l = window.location
-      l.replace(
-        l.protocol + '//' + l.hostname + (l.port ? ':' + l.port : '') +
-          l.pathname.split('/').slice(0, 1 + pathSegmentsToKeep).join('/') + '/?/' +
-          l.pathname.slice(1).split('/').slice(pathSegmentsToKeep).join('/').replace(/&/g, '~and~') +
-          (l.search ? '&' + l.search.slice(1).replace(/&/g, '~and~') : '') +
-          l.hash
-      )
+      ;(function () {
+        var l = window.location
+        var base = l.pathname.split('/').slice(0, 2).join('/') + '/'
+        var rest = l.pathname.slice(base.length).replace(/^\/+/, '')
+        var target = l.protocol + '//' + l.hostname + (l.port ? ':' + l.port : '') + base
+        if (rest) target += '#/' + rest
+        target += (l.search || '') + (l.hash || '')
+        l.replace(target)
+      })()
     </script>
   </head>
   <body></body>
