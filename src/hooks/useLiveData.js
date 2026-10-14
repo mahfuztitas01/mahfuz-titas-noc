@@ -43,7 +43,7 @@ export function useLive(intervalMs = 3000, seed = null, resetKey = 'default') {
 
 /** Live-jittered device list for a given client's devices. */
 export function useLiveDevices(seed = seedDevices, intervalMs = 4000) {
-  const [list, setList] = useState(seed)
+  const [list, setList] = useState(() => (Array.isArray(seed) ? seed : []))
 
   // reset when the active client's device set changes
   useEffect(() => {
@@ -54,7 +54,7 @@ export function useLiveDevices(seed = seedDevices, intervalMs = 4000) {
   useEffect(() => {
     const id = setInterval(() => {
       setList((prev) =>
-        prev.map((d) => {
+        (Array.isArray(prev) ? prev : []).map((d) => {
           const cpu = clamp(d.cpu + randInt(-7, 7), 8, 99)
           const memory = clamp(d.memory + randInt(-4, 4), 10, 99)
           let status = d.status

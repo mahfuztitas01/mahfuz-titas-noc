@@ -11,12 +11,12 @@ export function usePingStatus(devices, intervalMs = 15000) {
   const [checking, setChecking] = useState(false)
   const [configured, setConfigured] = useState(isBackendConfigured())
 
-  const ipsKey = (devices || []).map((d) => `${d.id}:${d.ip}`).join(',')
+  const ipsKey = (Array.isArray(devices) ? devices : []).map((d) => `${d.id}:${d.ip}`).join(',')
 
   useEffect(() => {
     let cancelled = false
     const run = async () => {
-      const list = (devices || []).filter((d) => d.ip && d.ip !== '—')
+      const list = (Array.isArray(devices) ? devices : []).filter((d) => d.ip && d.ip !== '—')
       if (list.length === 0) return
       if (!isBackendConfigured()) {
         if (!cancelled) {

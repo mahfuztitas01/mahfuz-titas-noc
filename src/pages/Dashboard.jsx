@@ -29,7 +29,12 @@ export default function Dashboard() {
   const { client, data } = useClient()
   const live = useLive(
     3000,
-    { bandwidth: data.linkUtilization.current, pppoeActive: data.kpis.pppoe.active, latency: data.destinations[0].latency, cpu: data.devices[0].cpu },
+    {
+      bandwidth: data.linkUtilization?.current ?? 0,
+      pppoeActive: data.kpis?.pppoe?.active ?? 0,
+      latency: data.destinations?.[0]?.latency ?? 0,
+      cpu: data.devices?.[0]?.cpu ?? 0,
+    },
     client.id
   )
   const deviceList = useLiveDevices(data.devices, 4000)
