@@ -15,7 +15,7 @@ import { CATEGORIES, VENDORS, getVendor } from '../data/vendors'
 import { getModel, getModelsForVendor } from '../data/deviceModels'
 import { statusToTone } from '../utils/format'
 
-const emptyForm = { name: '', ip: '', category: 'Router', vendor: 'mikrotik', model: 'rb4011', status: 'online', cpu: 0, memory: 0 }
+const emptyForm = { name: '', ip: '', port: '', category: 'Router', vendor: 'mikrotik', model: 'rb4011', status: 'online', cpu: 0, memory: 0 }
 
 export default function Devices() {
   const { push } = useToast()
@@ -32,6 +32,7 @@ export default function Devices() {
   const buildDevice = () => ({
     name: form.name,
     ip: form.ip,
+    port: String(form.port || '').trim(),
     category: form.category,
     vendor: form.vendor,
     model: form.model,
@@ -39,20 +40,33 @@ export default function Devices() {
   })
 
   const save = () => {
-    if (!form.name || !form.ip) {
+    let ip = String(form.ip || '').trim()
+    let port = String(form.port || '').trim()
+    if (!port) {
+      const m = ip.match(/^([^:]+):(\d{1,5})$/)
+      if (m) {
+        ip = m[1]
+        port = m[2]
+      }
+    }
+    if (!form.name || !ip) {
       push('Device name and IP are required', 'error')
       return
     }
     if (modal.mode === 'add') {
       saveDevices(client.id, [
         ...list,
-        { ...buildDevice(), id: Date.now(), status: form.status, cpu: Number(form.cpu), memory: Number(form.memory), uptime: '0h', lastSeen: 'Just now' },
+        { ...buildDevice(), ip, port, id: Date.now(), status: form.status, cpu: Number(form.cpu), memory: Number(form.memory), uptime: '0h', lastSeen: 'Just now' },
       ])
       push(`Device ${form.name} added`, 'success')
     } else {
       saveDevices(
         client.id,
-        list.map((d) => (d.id === form.id ? { ...d, ...buildDevice(), status: form.status, cpu: Number(form.cpu), memory: Number(form.memory) } : d))
+        list.map((d) =>
+          d.id === form.id
+            ? { ...d, ...buildDevice(), ip, port, status: form.status, cpu: Number(form.cpu), memory: Number(form.memory), uptime: d.ip !== ip ? '0h' : d.uptime, lastSeen: d.ip !== ip ? 'Just now' : d.lastSeen }
+            : d
+        )
       )
       push(`Device ${form.name} updated`, 'success')
     }
@@ -74,7 +88,7 @@ export default function Devices() {
         </div>
       )
     } },
-    { key: 'ip', header: 'IP Address', render: (r) => <span className="font-mono text-xs">{r.ip}</span> },
+    { key: 'ip', header: 'IP Address', render: (r) => <span className="font-mono text-xs">{r.ip}{r.port ? ':' + r.port : ''}</span> },
     { key: 'type', header: 'Type / Vendor', render: (r) => (
       <span className="flex items-center gap-2 text-xs">
         <VendorBadge vendor={r.vendor} size={20} />
@@ -84,9 +98,9 @@ export default function Devices() {
     ) },
     { key: 'status', header: 'Status', render: (r) => { const st = liveStatus[r.id] || r.status; return <StatusBadge tone={statusToTone(st)} label={st} /> } },
     { key: 'cpu', header: 'CPU', render: (r) => (
-      <div className="w-24"><div className="mb-1 text-xs text-slate-500">{r.cpu}%</div><ProgressBar value={r.cpu} tone={r.cpu > 85 ? 'critical' : r.cpu > 65 ? 'warning' : 'success'} height="h-1.5" /></div>
+      <div className="w-24"><div className="mb-1 text-xs text-slate-500">{r.cpu ? `${r.cpu}%` : '—'}</div><ProgressBar value={r.cpu || 0} tone={r.cpu > 85 ? 'critical' : r.cpu > 65 ? 'warning' : 'success'} height="h-1.5" /></div>
     ) },
-    { key: 'memory', header: 'Memory', render: (r) => `${r.memory}%` },
+    { key: 'memory', header: 'Memory', render: (r) => (r.memory ? `${r.memory}%` : '—') },
     { key: 'uptime', header: 'Uptime' },
     { key: 'actions', header: 'Actions', align: 'right', render: (r) => (
       <div className="flex items-center justify-end gap-1">
@@ -148,6 +162,10 @@ export default function Devices() {
             <input className="noc-input" value={form.ip} onChange={(e) => setForm({ ...form, ip: e.target.value })} placeholder="172.17.55.5" />
           </div>
           <div>
+            <label className="noc-label">Port (optional)</label>
+            <input className="noc-input" value={form.port} onChange={(e) => setForm({ ...form, port: e.target.value })} placeholder="e.g. 16521" />
+          </div>
+          <div>
             <label className="noc-label">Device Category</label>
             <select className="noc-input" value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })}>
               {CATEGORIES.map((t) => <option key={t}>{t}</option>)}
@@ -190,14 +208,14 @@ export default function Devices() {
               <DeviceIcon category={details.category} status={details.status} size={44} />
               <div>
                 <div className="text-sm font-semibold text-slate-800 dark:text-slate-100">{details.name}</div>
-                <div className="text-xs text-slate-500 dark:text-slate-400">{getVendor(details.vendor).name} {details.category} · {details.ip}</div>
+                <div className="text-xs text-slate-500 dark:text-slate-400">{getVendor(details.vendor).name} {details.category} · {details.ip}{details.port ? ':' + details.port : ''}</div>
               </div>
             </div>
             <dl className="grid grid-cols-2 gap-3 text-sm">
               {Object.entries({
                 Category: details.category || details.type, Vendor: getVendor(details.vendor).name,
                 Model: getModel(details.model)?.name || '—',
-                Status: details.status, CPU: `${details.cpu}%`, Memory: `${details.memory}%`,
+                Status: details.status, Port: details.port || '—', CPU: details.cpu ? `${details.cpu}%` : '—', Memory: details.memory ? `${details.memory}%` : '—',
                 Uptime: details.uptime, 'Last Seen': details.lastSeen,
               }).map(([k, v]) => (
                 <div key={k} className="rounded-lg bg-slate-50 p-3 dark:bg-noc-panel2">
