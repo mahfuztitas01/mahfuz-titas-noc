@@ -17,7 +17,8 @@ export default class ErrorBoundary extends React.Component {
 
   handleClear = () => {
     try {
-      localStorage.clear()
+      localStorage.removeItem('mtnoc_session_v3')
+      localStorage.removeItem('mtnoc_session_v2')
     } catch {
       /* ignore */
     }
@@ -45,7 +46,7 @@ export default class ErrorBoundary extends React.Component {
               onClick={this.handleClear}
               className="px-4 py-2 rounded-lg bg-rose-600 hover:bg-rose-500 text-white"
             >
-              Clear local data &amp; reload
+              Reset login &amp; reload
             </button>
           </div>
         </div>
