@@ -39,7 +39,13 @@ const SEED_USERS = [...TEAM_USERS, ...CLIENT_USERS]
 
 function load(key, fallback) {
   try {
-    return JSON.parse(localStorage.getItem(key)) ?? fallback
+    const v = JSON.parse(localStorage.getItem(key))
+    if (v == null) return fallback
+    if (Array.isArray(fallback)) return Array.isArray(v) ? v : fallback
+    if (fallback && typeof fallback === 'object') {
+      return v && typeof v === 'object' && !Array.isArray(v) ? v : fallback
+    }
+    return v
   } catch {
     return fallback
   }
