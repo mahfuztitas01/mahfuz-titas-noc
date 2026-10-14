@@ -130,7 +130,7 @@ export function ClientProvider({ children }) {
 
   const data = useMemo(() => {
     const base = buildClientData(client)
-    if (Array.isArray(deviceStore[client.id])) base.devices = deviceStore[client.id]
+    if (Array.isArray(deviceStore[client.id]) && deviceStore[client.id].length > 0) base.devices = deviceStore[client.id]
     if (topologyStore[client.id] && typeof topologyStore[client.id] === 'object') base.topology = topologyStore[client.id]
     return base
   }, [client, deviceStore, topologyStore])

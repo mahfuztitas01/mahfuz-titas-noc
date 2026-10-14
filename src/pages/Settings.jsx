@@ -245,7 +245,7 @@ export default function Settings() {
               Roles: Super Admin, NOC Engineer, Support Engineer, Viewer. Manage users, roles, RADIUS and access control from the Management page.
             </p>
             <div className="mt-4">
-              <a href="/management"><Button variant="outline">Open Management</Button></a>
+              <a href="#/management"><Button variant="outline">Open Management</Button></a>
             </div>
           </Card>
         )}
