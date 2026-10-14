@@ -189,6 +189,7 @@ export function ClientProvider({ children }) {
     clientId: effectiveId,
     setClientId,
     data,
+    deviceStore,
     updateContact,
     saveDevices,
     saveTopology,

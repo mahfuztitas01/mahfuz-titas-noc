@@ -3,14 +3,14 @@ import { dispatchAlert } from '../services/notifications'
 
 // ---------------------------------------------------------------------------
 // Device-down detector.
-// When a device's effective status stays "offline" for downMs (default 20s),
+// When a device's effective status stays "offline" for downMs (default 5s),
 // ONE alert is sent (Telegram / webhook). When it comes back, a recovery alert
 // is sent. Re-fires only after the device has recovered and gone down again.
 //
 // Alerts are delivered by dispatchAlert() using the saved notification config
 // (Settings -> Notifications): Telegram needs only a bot token + chat id.
 // ---------------------------------------------------------------------------
-export function useDeviceDownAlerts(devices = [], statusMap = {}, clientMeta = {}, downMs = 20000) {
+export function useDeviceDownAlerts(devices = [], statusMap = {}, clientMeta = {}, downMs = 5000) {
   const downSince = useRef({}) // id -> first-seen-down timestamp
   const alerted = useRef(new Set()) // ids currently alerted as down
   const ref = useRef({ devices, statusMap, clientMeta })
@@ -75,7 +75,7 @@ export function useDeviceDownAlerts(devices = [], statusMap = {}, clientMeta = {
       })
     }
 
-    const id = setInterval(check, 4000)
+    const id = setInterval(check, 1000)
     return () => clearInterval(id)
   }, [downMs])
 }

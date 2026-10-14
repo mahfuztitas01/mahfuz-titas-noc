@@ -60,7 +60,7 @@ export default function Dashboard() {
     [client]
   )
   const { alerts, setStatus } = useAlertEngine(live, data.alerts, client.id, clientMeta)
-  // Device-down detector: 20s offline -> Telegram/webhook alert.
+  // Device-down detector: 5s offline -> Telegram/webhook alert.
   useDeviceDownAlerts(deviceList, effectiveStatus, clientMeta)
   const { push } = useToast()
   const [range, setRange] = useState('24H')
@@ -72,7 +72,7 @@ export default function Dashboard() {
       return
     }
     setSimDown((s) => ({ ...s, [dev.id]: true }))
-    push(`Simulating ${dev.name} down for 30s — alert fires at 20s`, 'info')
+    push(`Simulating ${dev.name} down for 30s — alert fires at ~5s`, 'info')
     setTimeout(() => {
       setSimDown((s) => {
         const n = { ...s }
@@ -176,7 +176,7 @@ export default function Dashboard() {
             <button
               onClick={simulateDown}
               className="rounded-lg border border-slate-200 px-2.5 py-1 text-xs font-medium text-slate-500 hover:bg-slate-50 dark:border-noc-border dark:text-slate-300 dark:hover:bg-noc-panel2"
-              title="Send a device down for 30s to test the 20s down alert"
+              title="Send a device down for 30s to test the 5s down alert"
             >
               Simulate device down
             </button>

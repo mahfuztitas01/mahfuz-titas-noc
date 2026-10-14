@@ -19,7 +19,7 @@ import { resolveTelegramChat } from '../services/telegram'
 const EMPTY_FORM = { name: '', short: '', contact: '', region: '', plan: 'Business', telegramChatId: '', telegramToken: '', telegramGroupName: '' }
 
 export default function Clients() {
-  const { clients, clientId, setClientId, updateContact, addClient, removeClient } = useClient()
+  const { clients, clientId, setClientId, updateContact, addClient, removeClient, deviceStore } = useClient()
   const { push } = useToast()
   const navigate = useNavigate()
 
@@ -28,7 +28,15 @@ export default function Clients() {
   const [form, setForm] = useState(EMPTY_FORM)
   const [tgStatus, setTgStatus] = useState('')
 
-  const enriched = useMemo(() => clients.map((c) => ({ ...c, data: buildClientData(c) })), [clients])
+  const enriched = useMemo(() => clients.map((c) => {
+    const d = buildClientData(c)
+    const saved = deviceStore[c.id]
+    if (Array.isArray(saved)) {
+      d.devices = saved
+      d.kpis = { ...d.kpis, onlineDevices: saved.filter((x) => x.status !== 'offline').length }
+    }
+    return { ...c, data: d }
+  }), [clients, deviceStore])
 
   const online = enriched.filter((c) => c.status === 'online').length
   const warning = enriched.filter((c) => c.status === 'warning').length
@@ -320,7 +328,7 @@ export default function Clients() {
             {tgStatus && <p className="mt-1 text-[11px] text-slate-500 dark:text-slate-400">{tgStatus}</p>}
             <p className="mt-2 text-[11px] text-slate-400">
               Add your bot to this ISP's Telegram group, paste the <strong>group link</strong> and press
-              <strong> Connect bot to group</strong>. This ISP's alerts — including the <strong>20s device-down</strong> alert — go to
+              <strong> Connect bot to group</strong>. This ISP's alerts — including the <strong>5s device-down</strong> alert — go to
               this group. The bot token is taken from Settings → Notifications (or enter one below).
             </p>
             <div className="mt-2">
