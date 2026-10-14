@@ -16,7 +16,7 @@ const SESSION_KEY = 'mtnoc_session_v3'
 const LEGACY_SESSION_KEY = 'mtnoc_session_v2'
 
 const TEAM_USERS = [
-  { id: 1, name: 'Mahfuz Titas', username: 'mahfuz', email: 'mahfuz@noc.local', role: 'Super Admin', status: 'active', password: 'admin123', clientId: null, lastLogin: 'Today, 09:12' },
+  { id: 1, name: 'Mahfuz Titas', username: 'mahfuz', email: 'mahfuztitas01@gmail.com', role: 'Super Admin', status: 'active', password: 'admin123', clientId: null, lastLogin: 'Today, 09:12' },
   { id: 2, name: 'Rahat Hossain', username: 'rahat', email: 'rahat@noc.local', role: 'NOC Engineer', status: 'active', password: 'rahat123', clientId: null, lastLogin: 'Today, 08:40' },
   { id: 3, name: 'Sadia Islam', username: 'sadia', email: 'sadia@noc.local', role: 'Support Engineer', status: 'active', password: 'sadia123', clientId: null, lastLogin: 'Yesterday, 18:22' },
   { id: 4, name: 'Arif Khan', username: 'arif', email: 'arif@noc.local', role: 'Viewer', status: 'disabled', password: 'arif123', clientId: null, lastLogin: '12 Sep, 11:05' },
@@ -48,7 +48,11 @@ function load(key, fallback) {
 const AuthContext = createContext(null)
 
 export function AuthProvider({ children }) {
-  const [users, setUsers] = useState(() => load(USERS_KEY, SEED_USERS))
+  const [users, setUsers] = useState(() =>
+    load(USERS_KEY, SEED_USERS).map((u) =>
+      u && u.email === 'mahfuz@noc.local' ? { ...u, email: 'mahfuztitas01@gmail.com' } : u,
+    ),
+  )
   const [currentUser, setCurrentUser] = useState(() => load(SESSION_KEY, null))
   const [remember, setRemember] = useState(() => Boolean(load(SESSION_KEY, null)))
 
