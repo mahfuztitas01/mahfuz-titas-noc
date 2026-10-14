@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Plus, Pencil, Trash2, Eye, Server } from 'lucide-react'
+import { Plus, Pencil, Trash2, Eye, Server, RefreshCw } from 'lucide-react'
 import Card from '../components/Card'
 import Button from '../components/Button'
 import DataTable from '../components/DataTable'
@@ -19,7 +19,7 @@ const emptyForm = { name: '', ip: '', category: 'Router', vendor: 'mikrotik', mo
 
 export default function Devices() {
   const { push } = useToast()
-  const { client, data, saveDevices } = useClient()
+  const { client, data, saveDevices, restoreDevices } = useClient()
   const list = data.devices
   const { status: liveStatus, reachable, checking, configured } = usePingStatus(list)
   const [modal, setModal] = useState(null) // {mode:'add'|'edit'}
@@ -113,7 +113,18 @@ export default function Devices() {
           </span>
         }
       >
-        <DataTable columns={columns} data={list} rowKey={(r) => r.id} />
+        {list.length === 0 ? (
+          <div className="flex flex-col items-center justify-center gap-3 py-12 text-center">
+            <Server className="h-10 w-10 text-slate-300 dark:text-slate-600" />
+            <p className="text-sm font-medium text-slate-600 dark:text-slate-300">No devices for {client.name}</p>
+            <p className="text-xs text-slate-400">You removed all devices. Restore the demo devices, or add a new one.</p>
+            <div className="flex gap-2">
+              <Button variant="outline" icon={RefreshCw} onClick={() => restoreDevices(client.id)}>Restore demo devices</Button>
+            </div>
+          </div>
+        ) : (
+          <DataTable columns={columns} data={list} rowKey={(r) => r.id} />
+        )}
       </Card>
 
       <Modal

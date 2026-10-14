@@ -130,7 +130,7 @@ export function ClientProvider({ children }) {
 
   const data = useMemo(() => {
     const base = buildClientData(client)
-    if (Array.isArray(deviceStore[client.id]) && deviceStore[client.id].length > 0) base.devices = deviceStore[client.id]
+    if (Array.isArray(deviceStore[client.id])) base.devices = deviceStore[client.id]
     if (topologyStore[client.id] && typeof topologyStore[client.id] === 'object') base.topology = topologyStore[client.id]
     return base
   }, [client, deviceStore, topologyStore])
@@ -177,6 +177,11 @@ export function ClientProvider({ children }) {
 
   const saveDevices = (id, devices) => setDeviceStore((prev) => ({ ...prev, [id]: devices }))
   const saveTopology = (id, topology) => setTopologyStore((prev) => ({ ...prev, [id]: topology }))
+  const restoreDevices = (id) => setDeviceStore((prev) => {
+    const next = { ...prev }
+    delete next[id]
+    return next
+  })
 
   const value = {
     client,
@@ -187,6 +192,7 @@ export function ClientProvider({ children }) {
     updateContact,
     saveDevices,
     saveTopology,
+    restoreDevices,
     locked: !!lockedClientId,
     addClient,
     removeClient,

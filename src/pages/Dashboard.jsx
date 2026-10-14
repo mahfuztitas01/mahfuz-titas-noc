@@ -182,6 +182,11 @@ export default function Dashboard() {
             </button>
           }
         >
+          {deviceList.length === 0 ? (
+            <div className="py-10 text-center text-sm text-slate-500 dark:text-slate-400">
+              No devices configured — add devices from the Local Devices page.
+            </div>
+          ) : (
           <ul className="divide-y divide-slate-100 dark:divide-noc-border/60">
             {deviceList.map((d) => {
               const Icon = getCategoryIcon(d.category || d.type)
@@ -210,6 +215,7 @@ export default function Dashboard() {
               )
             })}
           </ul>
+          )}
         </Card>
       </div>
 
